@@ -2,26 +2,38 @@ var gl;
 var canvas;
 var program;
 var attrPosition;
+var attrColor;
 var unfmScale;
 var unfmAspect;
-var triangleMesh = [-1, -.866, 1, -.866, 0, 1];
+var triangleMesh = [
+  -1, -.866,
+  .2, .6, 1,
+  1, -.866,
+  .6, 1, .2,
+  0, 1,
+  1, .2, .6
+];
 var triangleBuffer;
 
 var glslVertexSource = `
-attribute vec2 position;
 uniform float scale;
 uniform float aspect;
+attribute vec2 position;
+attribute vec3 color;
+varying vec3 _color;
 
 void main() {
   gl_Position = vec4(position.x / scale / aspect, position.y / scale, 0.5, 1.0);
+  _color = color;
 }
 `;
 
 var glslFragmentSource = `
 precision mediump float;
+varying vec3 _color;
 
 void main() {
-  gl_FragColor = vec4(.83, 0.43, 0.35, 1.0);
+  gl_FragColor = vec4(_color, 1.0);
 }
 `;
 
@@ -32,10 +44,12 @@ function setup() {
   gl.clearColor(.05, .23, .3, 1);
 
   program = createProgram(glslVertexSource, glslFragmentSource);
-  attrPosition = gl.getAttribLocation(program, "position");
   unfmScale = gl.getUniformLocation(program, "scale");
   unfmAspect = gl.getUniformLocation(program, "aspect");
+  attrPosition = gl.getAttribLocation(program, "position");
+  attrColor = gl.getAttribLocation(program, "color");
   gl.enableVertexAttribArray(attrPosition);
+  gl.enableVertexAttribArray(attrColor);
   gl.useProgram(program);
 
   triangleBuffer = gl.createBuffer();
@@ -57,7 +71,8 @@ function draw() {
   gl.clear(gl.COLOR_BUFFER_BIT);
 
   gl.bindBuffer(gl.ARRAY_BUFFER, triangleBuffer);
-  gl.vertexAttribPointer(attrPosition, 2, gl.FLOAT, false, 4 * 2, 0);
+  gl.vertexAttribPointer(attrPosition, 2, gl.FLOAT, false, 4 * (2 + 3), 0);
+  gl.vertexAttribPointer(attrColor, 3, gl.FLOAT, false, 4 * (2 + 3), 4 * 2);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
 
   gl.flush();
