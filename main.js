@@ -58,7 +58,7 @@ function setup() {
   gl.useProgram(program);
 
   // tell our shader the scale we want
-  gl.uniform1f(unfmScale, 2.2);
+  gl.uniform1f(unfmScale, 2.1);
 
   // start the draw loop
   draw();
